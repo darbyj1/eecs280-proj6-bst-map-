@@ -367,19 +367,26 @@ private:
   //          tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static Node *copy_nodes_impl(Node *node) {
-//////////THIS IS ALL WRONG//////////////////////////////////
-    if(node != nullptr){ //once at nullptr we are done copying in
-      copy_nodes_impl(node->left);
-      copy_nodes_impl(node->right);
+    //base: at end node ("empty")
+    if(node == nullptr){
+      return node;
     }
-    //recursion: last one to return should be root?
-    return insert_impl(node);
+    //recursion: make new root for each left/right subtree = fill in tree
+    return new Node(node->datum, copy_node_impl(node->left), copy_node_impl(node->right));
   }
 
   // EFFECTS: Frees the memory for all nodes used in the tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static void destroy_nodes_impl(Node *node) {
-    assert(false);
+    //base case: done so do nothing
+    if(node == nullptr){
+      return;
+    }
+    //destroy left and right then parent bc cant lose parent before kill everything it in 
+    //charge of
+    destroy_nodes_impl(node->left);
+    destroy_nodes_impl(node->right);
+    delete node;
   }
 
   // EFFECTS : Searches the tree rooted at 'node' for an element equivalent
@@ -395,7 +402,18 @@ private:
   //       Two elements A and B are equivalent if and only if A is
   //       not less than B and B is not less than A.
   static Node * find_impl(Node *node, const T &query, Compare less) {
-    assert(false);
+    //base: found it or gone through everything 
+    if(node == nullptr || (!less(node->datum, query) && !less(query < node->datum))){
+      return node;
+    }
+    //recursion: can cut half based on where query is 
+    if(less(*node, query)){ 
+      return find_impl(node->right);
+    }
+    else{
+      return find_impl(node->left);
+    }
+
   }
 
   // REQUIRES: item is not already contained in the tree rooted at 'node'
@@ -414,7 +432,20 @@ private:
   //       template, NOT according to the < operator. Use the "less"
   //       parameter to compare elements.
   static Node * insert_impl(Node *node, const T &item, Compare less) {
-    assert(false);
+    //Base: get to end of tree (also covers empty case)
+    if(node == nullptr){
+      // make "new" only once to end based off of recursive lefts and rights
+      return new Node(item, nullptr, nullptr);
+    }
+    //recursive case: always gonna have to go until empty space
+    if(less(node->datum, item)){ //item bigger than current loc so insert to the right
+      node->right = insert_impl(node->right, item, less);
+    }
+    else{ //item smaller than current  so insert to the left
+      node->left = insert_impl(node->left, item, less);
+    }
+    //return original node
+    return node;
   }
 
   // EFFECTS : Returns a pointer to the Node containing the minimum element
@@ -452,7 +483,19 @@ private:
   //          rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static bool check_sorting_invariant_impl(const Node *node, Compare less) {
-    assert(false);
+    //base case: at end of tree (/empty) (if get here without catching then we good)
+    if(node == nullptr){
+      return true;
+    }
+    //everytime hit a new node, check if its left and right are chilling
+    if(node->left != nullptr && (less(node->datum, node->left->datum))){
+      return false;
+    }
+    if(node->right != nullptr && (less(node->right->datum, node->datum))){
+      return false;
+    }
+    //if get through both checks without catching then keep going
+    return check_sorting_invarient_impl(node->right) && check_sorting_invarient_impl(node->left);
   }
 
   // EFFECTS : Traverses the tree rooted at 'node' using an in-order traversal,
