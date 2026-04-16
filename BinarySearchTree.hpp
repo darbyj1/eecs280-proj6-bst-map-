@@ -333,7 +333,7 @@ private:
   // NOTE:    This function must run in constant time.
   //          No iteration or recursion is allowed.
   static bool empty_impl(const Node *node) {
-    assert(false);
+    return node == nullptr;
   }
 
   // EFFECTS: Returns the size of the tree rooted at 'node', which is the
@@ -341,7 +341,12 @@ private:
   //          tree is 0.
   // NOTE:    This function must be tree recursive.
   static int size_impl(const Node *node) {
-    assert(false);
+    //base case: empty tree
+    if (empty_impl(node)){
+      return 0;
+    }
+    //recursive case
+    return 1 + size_impl(node->left) + size_impl(node->right);
   }
 
   // EFFECTS: Returns the height of the tree rooted at 'node', which is the
@@ -349,7 +354,12 @@ private:
   //          The height of an empty tree is 0.
   // NOTE:    This function must be tree recursive.
   static int height_impl(const Node *node) {
-    assert(false);
+    //base case: empty tree
+    if (empty_impl(node)){
+      return 0;
+    }
+    //recursive
+    return 1 + std::max(height_impl(node->left), height_impl(node->right));
   }
 
   // EFFECTS: Creates and returns a pointer to the root of a new node structure
@@ -357,7 +367,13 @@ private:
   //          tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static Node *copy_nodes_impl(Node *node) {
-    assert(false);
+//////////THIS IS ALL WRONG//////////////////////////////////
+    if(node != nullptr){ //once at nullptr we are done copying in
+      copy_nodes_impl(node->left);
+      copy_nodes_impl(node->right);
+    }
+    //recursion: last one to return should be root?
+    return insert_impl(node);
   }
 
   // EFFECTS: Frees the memory for all nodes used in the tree rooted at 'node'.
@@ -409,7 +425,12 @@ private:
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the smallest element lives.
   static Node * min_element_impl(Node *node) {
-    assert(false);
+    //base: at the farthest left
+    if(node->left == nullptr){
+      return node;
+    }
+    //recursive
+    return min_element_impl(node->left);
   }
 
   // EFFECTS : Returns a pointer to the Node containing the maximum element
@@ -418,7 +439,12 @@ private:
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the largest element lives.
   static Node * max_element_impl(Node *node) {
-    assert(false);
+    //base: at the farthest right
+    if(node->right == nullptr){
+      return node;
+    }
+    //recursive
+    return max_element_impl(node->right);
   }
 
 
