@@ -403,15 +403,15 @@ private:
   //       not less than B and B is not less than A.
   static Node * find_impl(Node *node, const T &query, Compare less) {
     //base: found it or gone through everything 
-    if(node == nullptr || (!less(node->datum, query) && !less(query < node->datum))){
+    if(node == nullptr || (!less(node->datum, query) && !less(query, node->datum))){
       return node;
     }
     //recursion: can cut half based on where query is 
-    if(less(*node, query)){ 
-      return find_impl(node->right);
+    if(less(node->datum, query)){ 
+      return find_impl(node->right, query, less);
     }
     else{
-      return find_impl(node->left);
+      return find_impl(node->left, query, less);
     }
 
   }
@@ -483,20 +483,24 @@ private:
   //          rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static bool check_sorting_invariant_impl(const Node *node, Compare less) {
+    
     //base case: at end of tree (/empty) (if get here without catching then we good)
     if(node == nullptr){
       return true;
     }
     //everytime hit a new node, check if its left and right are chilling
-    if(node->left != nullptr && (less(node->datum, node->left->datum))){
+    if(!all_tree_less(node->left, node->datum, less)){ //takes subtree root + current val
       return false;
     }
-    if(node->right != nullptr && (less(node->right->datum, node->datum))){
+    if(!all_tree_greater(node->right, node->datum, less)){
       return false;
     }
-    //if get through both checks without catching then keep going
-    return check_sorting_invarient_impl(node->right) && check_sorting_invarient_impl(node->left);
+
+    return check_sorting_invariant_impl(node->left, less) && 
+            check_sorting_invariant_impl(node->right, less);
   }
+
+
 
   // EFFECTS : Traverses the tree rooted at 'node' using an in-order traversal,
   //           printing each element to os in turn. Each element is followed
@@ -507,7 +511,12 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#In-order
   //       for the definition of a in-order traversal.
   static void traverse_inorder_impl(const Node *node, std::ostream &os) {
-    assert(false);
+    if(node == nullptr){
+      return;
+    }
+    traverse_inorder_impl(node->left, os);
+    os << node->datum << " ";
+    traverse_inorder_impl(node->right, os);
   }
 
   // EFFECTS : Traverses the tree rooted at 'node' using a pre-order traversal,
@@ -519,7 +528,13 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#Pre-order
   //       for the definition of a pre-order traversal.
   static void traverse_preorder_impl(const Node *node, std::ostream &os) {
-    assert(false);
+    if(node == nullptr){
+      return;
+    }
+    os << node->datum << " ";
+    traverse_preorder_impl(node->left, os);
+    traverse_preorder_impl(node->right, os);
+
   }
 
   // EFFECTS : Returns a pointer to the Node containing the smallest element
@@ -534,8 +549,54 @@ private:
   //       'less' parameter). Based on the result, you gain some information
   //       about where the element you're looking for could be.
   static Node * min_greater_than_impl(Node *node, const T &val, Compare less) {
-    assert(false);
+    if(node == nullptr){
+      return nullptr;
+    }
+
+    //datum is not greater than val then go right for bigger (catch in lower or end)
+    if(less(node->datum, val)){
+      return min_greater_than_impl(node->right, val, less);
+    }
+    //datum is greater
+    // left will be smaller than current so need to check if is still greater than 
+    //val and if so keep checking until it is not anymore
+    if(node->left == nullptr || less(node->left->datum, val)){
+      return node;
+    }
+    else{
+      return min_greater_than_impl(node->left, val, less);
+    }
   }
+
+private:
+
+  //EFFECTS: returns true if all of the elements in the tree rooted at the node are
+  //strictly less than the passed value
+  static bool all_tree_less(Node *node, const T &val, Compare less){
+    //base: end of the tree or node is not less than
+    if(node == nullptr){
+      return true;
+    }
+    else if (!less(node->datum, val)){
+      return false;
+    }
+
+    return all_tree_less(node->left, val, less) && all_tree_less(node->right, val, less);
+  }
+
+  //EFFECTS: returns true if all of the elements in the tree rooted at the node are
+  //strictly greater than the passed value
+  static bool all_tree_greater(Node *node, const T &val, Compare less){
+    //base: end of the tree or node is not greater than
+    if(node == nullptr){
+      return true;
+    }
+    else if (less(node->datum, val)){
+      return false;
+    }
+
+    return all_tree_greater(node->left, val, less) && all_tree_greater(node->right, val, less);
+  }  
 
 
 }; // END of BinarySearchTree class
