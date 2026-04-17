@@ -554,9 +554,10 @@ private:
     }
 
     //datum is not greater than val then go right for bigger (catch in lower or end)
-    if(less(node->datum, val)){
+    if(less(node->datum, val) || (!less(node->datum, val) && !less(val, node->datum))){
       return min_greater_than_impl(node->right, val, less);
     }
+
     //datum is greater
     // left will be smaller than current so need to check if is still greater than 
     //val and if so keep checking until it is not anymore
