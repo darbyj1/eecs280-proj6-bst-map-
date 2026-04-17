@@ -342,10 +342,10 @@ private:
   // NOTE:    This function must be tree recursive.
   static int size_impl(const Node *node) {
     //base case: empty tree
-    if (empty_impl(node)){
+    if (node == nullptr){
       return 0;
     }
-    //recursive case
+    //recursive case: current node plus size of each subtree
     return 1 + size_impl(node->left) + size_impl(node->right);
   }
 
@@ -355,7 +355,7 @@ private:
   // NOTE:    This function must be tree recursive.
   static int height_impl(const Node *node) {
     //base case: empty tree
-    if (empty_impl(node)){
+    if (node == nullptr){
       return 0;
     }
     //recursive
@@ -372,7 +372,8 @@ private:
       return node;
     }
     //recursion: make new root for each left/right subtree = fill in tree
-    return new Node(node->datum, copy_node_impl(node->left), copy_node_impl(node->right));
+    return new Node(node->datum, copy_nodes_impl(node->left), 
+            copy_nodes_impl(node->right));
   }
 
   // EFFECTS: Frees the memory for all nodes used in the tree rooted at 'node'.
@@ -456,8 +457,12 @@ private:
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the smallest element lives.
   static Node * min_element_impl(Node *node) {
-    //base: at the farthest left
-    if(node->left == nullptr){
+    //empty or base: at the farthest left
+    if(node == nullptr){
+      return nullptr;
+    }
+    
+    else if(node->left == nullptr){
       return node;
     }
     //recursive
@@ -471,7 +476,10 @@ private:
   //       structure, and where the largest element lives.
   static Node * max_element_impl(Node *node) {
     //base: at the farthest right
-    if(node->right == nullptr){
+    if(node == nullptr){
+      return nullptr;
+    }
+    else if(node->right == nullptr){
       return node;
     }
     //recursive
@@ -558,14 +566,15 @@ private:
       return min_greater_than_impl(node->right, val, less);
     }
 
-    //datum is greater
-    // left will be smaller than current so need to check if is still greater than 
-    //val and if so keep checking until it is not anymore
-    if(node->left == nullptr || less(node->left->datum, val)){
-      return node;
+    //datum is greater 
+    //will only update check (w smaller val since left) if is greater than val
+    Node *check = min_greater_than_impl(node->left, val, less);
+    // get thru to end means check never better
+    if(check != nullptr){
+      return check;
     }
     else{
-      return min_greater_than_impl(node->left, val, less);
+      return node;
     }
   }
 
@@ -596,7 +605,8 @@ private:
       return false;
     }
 
-    return all_tree_greater(node->left, val, less) && all_tree_greater(node->right, val, less);
+    return all_tree_greater(node->left, val, less) && 
+            all_tree_greater(node->right, val, less);
   }  
 
 
