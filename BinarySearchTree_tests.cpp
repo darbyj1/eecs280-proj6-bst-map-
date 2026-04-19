@@ -89,6 +89,16 @@ TEST(test_copy){
     cout << "cout << ass_tree.to_string()" << endl;
     cout << ass_tree.to_string() << endl << endl;
 
+    //copy empty
+    BinarySearchTree<int> empty_tree;
+    ass_tree = empty_tree;
+    ASSERT_TRUE(ass_tree.size() == 0);
+    ASSERT_TRUE(ass_tree.height() == 0);
+    ASSERT_TRUE(ass_tree.empty());
+
+    //copy single
+    //copy skew_right 
+    //copy skew_left
 }
 
 TEST(test_insert_compex){
@@ -120,27 +130,53 @@ TEST(test_insert_compex){
 
 }
 
-// TEST(test_copy){
-//     //copy basic
+TEST(test_find){
+    //empty tree
+     BinarySearchTree<int> tree;
+     ASSERT_EQUAL(tree.find(12), tree.end());
 
-//     //copy empty
+     //find single
+     tree.insert(6);
 
-//     //copy single 
+    ASSERT_EQUAL(tree.find(10), tree.end());
+    auto returned = tree.find(6);
+    ASSERT_EQUAL(returned, tree.begin());
+    ASSERT_EQUAL(*returned, 6);
 
-//     //copy skew_right 
+     tree.insert(2);
+     tree.insert(5);
+     tree.insert(8);
+     tree.insert(7);
+     tree.insert(9);
 
-//     //copy skew_left
 
-// }
+    //find not there
+    returned = tree.find(11);
+    ASSERT_EQUAL(returned, tree.end());
+    //right
+    returned = tree.find(8);
+    ASSERT_FALSE(returned == tree.begin());
+    ASSERT_EQUAL(*returned, 8);  
 
-// TEST(test_find){
-//     //find first
+    returned = tree.find(7);
+    ASSERT_FALSE(returned == tree.begin());
+    ASSERT_EQUAL(*returned, 7);  
 
-//     //find terminal 
+    //left
+    returned = tree.find(2);
+    ASSERT_TRUE(returned == tree.begin());
+    ASSERT_EQUAL(*returned, 2); 
 
-//     //find single
+    returned = tree.find(5);
+    ASSERT_FALSE(returned == tree.begin());
+    ASSERT_EQUAL(*returned, 5);  
 
-// }
+    //find first
+    returned = tree.find(6);
+    ASSERT_FALSE(returned == tree.begin());
+    ASSERT_EQUAL(*returned, 6);  
+
+}
 
 TEST(test_min_max){
     //max elt first
@@ -179,7 +215,6 @@ TEST(test_min_max){
     ASSERT_EQUAL(tree_empty.min_element(), tree_empty.end());  
     
 
-
     //min elt first
     BinarySearchTree<int> skew_right_tree;
     skew_right_tree.insert(1);
@@ -200,12 +235,113 @@ TEST(test_min_max){
 
 }
 
-// TEST(test_check_sort){
+TEST(test_check_sort){
+    BinarySearchTree<int> tree;
+    //empty
+    ASSERT_TRUE(tree.check_sorting_invariant());
 
-// }
+    //is
+    tree.insert(5);
+    //single
+    ASSERT_TRUE(tree.check_sorting_invariant());
+    tree.insert(3);
+    tree.insert(4);
+    tree.insert(7);
 
-// TEST(test_min_great){
+    ASSERT_TRUE(tree.check_sorting_invariant());
+
+    //isnt
+    auto it = tree.begin(); //3
+    ++it; //4
+    *it = 6;
+    ASSERT_FALSE(tree.check_sorting_invariant());
+
+    BinarySearchTree<int> tree2;
+    tree2.insert(1);
+    tree2.insert(0);
+    *tree2.begin() = 2;
+    ASSERT_FALSE(tree2.check_sorting_invariant());
+
+    BinarySearchTree<int> tree3;
+    tree3.insert(1);
+    tree3.insert(0);
+    tree3.insert(3);
+    *tree3.begin() = 2;
+    ASSERT_FALSE(tree3.check_sorting_invariant());
+
+    BinarySearchTree<int> tree4;
+    tree4.insert(4);
+    tree4.insert(2);
+    tree4.insert(0);
+    tree4.insert(3);
+    tree4.insert(7);
     
-// }
+
+    it = tree4.begin();
+    ++it; //2
+    ++it; //3
+    *it = 5;
+    ASSERT_FALSE(tree4.check_sorting_invariant());
+
+    *it = 3;
+    ASSERT_TRUE(tree4.check_sorting_invariant());
+    ++it; //4
+
+    *it = 1;
+    ASSERT_FALSE(tree4.check_sorting_invariant());
+    *it = 10;
+    ASSERT_FALSE(tree4.check_sorting_invariant());
+    *it = 4;
+    ASSERT_TRUE(tree4.check_sorting_invariant());
+
+    ++it; //7
+    *it = 1;
+    ASSERT_FALSE(tree4.check_sorting_invariant());
+    *it = 7;
+
+    tree4.insert(6);
+    tree4.insert(8);
+    it = tree4.begin();
+    ++it;//2
+    ++it;//3
+    *it = 5;
+    ASSERT_FALSE(tree4.check_sorting_invariant());
+    *it = 3;
+    ASSERT_TRUE(tree4.check_sorting_invariant());
+    ++it;//4
+    ++it;//6
+    *it = 1;
+    ASSERT_FALSE(tree4.check_sorting_invariant());
+    *it = 6;
+    ASSERT_TRUE(tree4.check_sorting_invariant());
+    ++it;//7
+    ++it;//8
+    *it = 1;
+    ASSERT_FALSE(tree4.check_sorting_invariant());
+
+
+}
+
+TEST(test_min_great){
+    BinarySearchTree<int> tree_back;
+    tree_back.insert(20);
+    tree_back.insert(10);
+    tree_back.insert(30);
+    tree_back.insert(17);
+
+
+    //direct
+    ASSERT_EQUAL(*tree_back.min_greater_than(19), 20);
+
+    //backwards
+    ASSERT_EQUAL(*tree_back.min_greater_than(15), 17);
+
+    //equal
+    ASSERT_EQUAL(*tree_back.min_greater_than(17), 20);
+
+    //none
+    ASSERT_EQUAL(tree_back.min_greater_than(32), tree_back.end());
+
+}
 
 TEST_MAIN()
