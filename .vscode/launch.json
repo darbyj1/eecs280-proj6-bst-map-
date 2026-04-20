@@ -9,7 +9,7 @@
             "name": "Launch",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/BinarySearchTree_public_tests.exe",
+            "program": "${workspaceFolder}/Map_public_tests.exe",
             "args": [],
             "cwd": "${workspaceFolder}"
         }
