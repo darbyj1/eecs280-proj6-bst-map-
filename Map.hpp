@@ -35,9 +35,11 @@ private:
     public:
     //returns true if lhs compares less than rhs and false otherwise, only uses first
     //element of the pair (so sort by key only)
-    bool operator()(const Pair_type &lhs, const Pair_type &rhs){
-      return Key_compare()(lhs.first, rhs.first);
+    bool operator()(const Pair_type &lhs, const Pair_type &rhs) const{
+      return compare(lhs.first, rhs.first);
     }
+    private:
+    Key_compare compare;
   };
 
 public:
@@ -68,13 +70,13 @@ public:
 
   // EFFECTS : Returns whether this Map is empty.
   bool empty() const {
-    assert(false);
+    return bst.empty();
   }
 
   // EFFECTS : Returns the number of elements in this Map.
   // NOTE : size_t is an integral type from the STL
   size_t size() const{
-    assert(false);
+    return bst.size();
   }
 
   // EFFECTS : Searches this Map for an element with a key equivalent
@@ -85,7 +87,7 @@ public:
   //       (key, value) pairs, you'll need to construct a dummy value
   //       using "Value_type()".
   Iterator find(const Key_type& k) const{
-    assert(false);
+    return bst.find({k, Value_type()});
   }
 
   // MODIFIES: this
@@ -105,7 +107,17 @@ public:
   //
   // HINT: http://www.cplusplus.com/reference/map/map/operator[]/
   Value_type& operator[](const Key_type& k){
-    assert(false);
+    //try instert
+    //does already exist then need return value 
+    auto it = find(k);
+    if(it != end()){
+      return it->second;
+    }
+    //doesnt exits then insert it 
+    auto in_it = insert({k, Value_type()}).first;
+
+    //return default initialized through the iterator returned from insert()
+    return in_it->second;
   }
 
   // MODIFIES: this
@@ -117,17 +129,22 @@ public:
   //           an iterator to the newly inserted element, along with
   //           the value true.
   std::pair<Iterator, bool> insert(const Pair_type &val){
-    assert(false);
+    //if not included then add
+    if(find(val.first) == end()){
+      return {bst.insert(val), true};
+    }
+    //already included then return iterator to it and false
+    return {find(val.first), false};
   }
 
   // EFFECTS : Returns an iterator to the first key-value pair in this Map.
   Iterator begin() const{
-    assert(false);
+    return bst.begin();
   }
 
   // EFFECTS : Returns an iterator to "past-the-end".
   Iterator end() const{
-    assert(false);
+    return bst.end();
   }
 
 private:
